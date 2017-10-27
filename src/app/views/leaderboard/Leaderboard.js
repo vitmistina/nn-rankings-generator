@@ -3,6 +3,7 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
+import { Line as LineChart } from "react-chartjs";
 import {
   Top70Production,
   Top10Meetings,
@@ -36,12 +37,37 @@ class Leaderboard extends PureComponent {
             list={_.get(this.props, "leaderboardData.topUMsPercentage")}
           />
         </div>
+        <Top70Production
+          top70Production={_.get(this.props, "leaderboardData.top70Production")}
+        />
         <div className="col-md-12">
-          <Top70Production
-            top70Production={_.get(
-              this.props,
-              "leaderboardData.top70Production"
-            )}
+          <h2>Historie produkce</h2>
+          <LineChart
+            data={{
+              labels: _.map(this.props.leaderboardData.timeline, datapoint => {
+                return _.get(datapoint, "datum");
+              }),
+              datasets: [
+                {
+                  fillColor: "rgba(234,101,13,1)",
+                  data: _.map(
+                    this.props.leaderboardData.timeline,
+                    datapoint => {
+                      return _.get(datapoint, "produkce");
+                    }
+                  )
+                }
+              ]
+            }}
+            options={{
+              scaleOverride: true,
+              scaleSteps: 2,
+              scaleStepWidth: 10000000,
+              scaleStartValue: 0,
+              pointDot: false
+            }}
+            width="1100"
+            height="400"
           />
         </div>
       </div>

@@ -7,7 +7,7 @@ export default class Top70Production extends PureComponent {
   render() {
     const { top70Production } = this.props;
     return (
-      <div>
+      <div className="col-md-12">
         <h2 className="">
           Soutěž o 70 CCS karet dle objemu převedených prostředků
         </h2>

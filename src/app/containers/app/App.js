@@ -26,7 +26,7 @@ class App extends Component {
 
     return (
       <div id="appContainer">
-        <div className="container-fluid">
+        <div className="container">
           <div className="clearfix main-container">
             <MainRoutes />
           </div>

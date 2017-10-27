@@ -10,9 +10,9 @@
       "cross-env NODE_ENV=test nyc mocha test/.setup.js test/**/*.spec.js --recursive",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "dev":
-      "rimraf docs/public/assets/ && cross-env NODE_ENV=dev webpack --config webpack.dev.config.js",
+      "rimraf docs && cross-env NODE_ENV=dev webpack --config webpack.dev.config.js",
     "prod":
-      "rimraf docs/public/assets/ && cross-env NODE_ENV=production webpack -p --config webpack.production.config.js ",
+      "rimraf docs && cross-env NODE_ENV=production webpack -p --config webpack.production.config.js ",
     "start": "cross-env NODE_ENV=dev node server.hot.reload",
     "serve-dev":
       "npm run dev && cross-env NODE_ENV=dev nodemon ./src/server/index.js",
@@ -113,10 +113,12 @@
     "babel-polyfill": "^6.23.0",
     "bootstrap": "^3.3.7",
     "chalk": "^2.0.1",
+    "chart.js": "^1.1.1",
     "classnames": "^2.2.5",
     "express": "^4.15.3",
     "font-awesome": "^4.7.0",
     "history": "^4.6.1",
+    "html-webpack-plugin": "^2.30.1",
     "html-webpack-template": "^5.6.0",
     "jquery": "^3.2.1",
     "js-base64": "^2.1.9",
@@ -126,6 +128,7 @@
     "prop-types": "^15.5.10",
     "react": "^15.6.1",
     "react-bootstrap": "^0.31.2",
+    "react-chartjs": "^0.8.0",
     "react-dom": "^15.6.1",
     "react-modal": "^2.2.2",
     "react-motion": "^0.5.0",
