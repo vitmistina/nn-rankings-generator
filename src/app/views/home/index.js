@@ -16,7 +16,9 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return bindActionCreators(
     {
-      parseData: dataActions.parseData
+      parseData: dataActions.parseData,
+      parseXLSX: dataActions.parseXLSX,
+      resetData: dataActions.resetData
     },
     dispatch
   );

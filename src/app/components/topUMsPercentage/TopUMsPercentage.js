@@ -17,10 +17,21 @@ export default class TopUMsPercentage extends PureComponent {
           _.ceil(_.size(_.slice(list, 0, 16)) / 2)
         ).map((column, columnIndex) => {
           return (
-            <div className="col-md-6">
+            <div
+              className="col-md-6"
+              key={"topUMsPercentage-column-" + columnIndex}
+            >
               {column.map((agent, index) => {
                 return (
-                  <div className="top-um-card" key={index}>
+                  <div
+                    className="top-um-card"
+                    key={
+                      "topUMsPercentage-row-" +
+                      index +
+                      "-of-column" +
+                      columnIndex
+                    }
+                  >
                     <div className="col-md-1">
                       <strong>
                         {index +
@@ -34,7 +45,7 @@ export default class TopUMsPercentage extends PureComponent {
                     </div>
                     <div className="col-md-5">{agent.jmeno}</div>
                     <div className="col-md-3 text-right">
-                      <strong>{agent.procento}</strong>
+                      <strong>{agent.procento} %</strong>
                     </div>
                   </div>
                 );
@@ -59,7 +70,7 @@ export default class TopUMsPercentage extends PureComponent {
                           16 +
                           columnIndex * _.ceil(_.size(_.slice(list, 16)) / 4)}.
                       </strong>{" "}
-                      {agent.jmeno}
+                      {agent.jmeno} <strong>{agent.procento} %</strong>
                     </div>
                   );
                 })}

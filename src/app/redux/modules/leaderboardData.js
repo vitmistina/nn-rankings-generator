@@ -1,4 +1,5 @@
 import _ from "lodash";
+import * as XLSX from "xlsx";
 
 const PARSE_DATA = "PARSE_DATA";
 const RESET_DATA = "RESET_DATA";
@@ -7,7 +8,8 @@ const initialState = {
   top70Production: [],
   top10Meetings: [],
   topUMsPercentage: [],
-  timeline: []
+  timeline: [],
+  dataLoaded: false
 };
 
 export default function(state = initialState, action) {
@@ -17,7 +19,8 @@ export default function(state = initialState, action) {
         top70Production: action.top70Production,
         top10Meetings: action.top10Meetings,
         topUMsPercentage: action.topUMsPercentage,
-        timeline: action.timeline
+        timeline: action.timeline,
+        dataLoaded: true
       });
     case RESET_DATA:
       return Object.assign({}, initialState);
@@ -84,5 +87,123 @@ export function parseData(form, history) {
       )
     });
     dispatch(history.push("/zebricek"));
+  };
+}
+
+export function parseXLSX(file, history) {
+  return dispatch => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const wb = XLSX.read(reader.result, { type: "binary" });
+      const unityDetail = _.filter(
+        XLSX.utils.sheet_to_json(wb.Sheets["Unity_detail"], {
+          range: 3
+        }),
+        row => {
+          return _.size(row) > 0;
+        }
+      );
+
+      const poradciDetail = _.filter(
+        XLSX.utils.sheet_to_json(wb.Sheets["Poradci_detail"], {
+          range: 3
+        }),
+        row => {
+          return _.size(row) > 0;
+        }
+      );
+
+      const topUMsPercentageSource = _.reverse(
+        _.sortBy(unityDetail, row => {
+          const uspesnost = new Number(
+            _.get(row, "Úspěšnost Kč").replace(/[^0-9$.,]/g, "")
+          );
+          return uspesnost;
+        })
+      );
+
+      const topUMsPercentage = _.map(topUMsPercentageSource, row => {
+        return {
+          agentura: _.get(row, "Agentura").substring(0, 2),
+          jmeno: _.get(row, "Unit manager"),
+          procento: new Number(
+            _.get(row, "Úspěšnost Kč").replace(/[^0-9$.,]/g, "")
+          ).toLocaleString("cs-CZ", {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+          })
+        };
+      });
+
+      const top70ProductionSource = _.reverse(
+        _.sortBy(poradciDetail, row => {
+          const uspesnost = new Number(
+            _.get(row, "Hodnota investic").replace(/[^0-9$.]/g, "")
+          );
+          return uspesnost;
+        })
+      );
+
+      const top70Production = _.map(top70ProductionSource, row => {
+        return {
+          agentura: _.get(row, "Agentura").substring(0, 2),
+          jmeno: _.get(row, "PORADCE"),
+          produkce: new Number(
+            _.get(row, "Hodnota investic").replace(/[^0-9$.]/g, "")
+          ).toLocaleString("cs-CZ", {
+            style: "currency",
+            currency: "CZK",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          })
+        };
+      });
+
+      const top10MeetingSource = _.reverse(
+        _.sortBy(
+          _.sortBy(poradciDetail, row => {
+            const produkce = new Number(
+              _.get(row, "Úspěšnost Kč").replace(/[^0-9$.,]/g, "")
+            );
+            return produkce;
+          }),
+          row => {
+            const pocetPrilezitosti = new Number(_.get(row, "Počet maturit"));
+            const pocetUzavrenych = new Number(_.get(row, "Lead ukončen"));
+            const uspesnost = pocetUzavrenych / pocetPrilezitosti;
+            return uspesnost;
+          }
+        )
+      );
+
+      const top10Meetings = _.slice(
+        _.map(top10MeetingSource, row => {
+          return {
+            jmeno: _.get(row, "PORADCE")
+          };
+        }),
+        0,
+        10
+      );
+
+      dispatch({
+        type: PARSE_DATA,
+        top70Production: top70Production,
+        topUMsPercentage: topUMsPercentage,
+        top10Meetings: top10Meetings
+      });
+
+      history.push("/zebricek");
+    };
+    reader.onabort = () => console.log("file reading was aborted");
+    reader.onerror = () => console.log("file reading has failed");
+
+    reader.readAsBinaryString(file);
+  };
+}
+
+export function resetData() {
+  return dispatch => {
+    dispatch({ type: RESET_DATA });
   };
 }

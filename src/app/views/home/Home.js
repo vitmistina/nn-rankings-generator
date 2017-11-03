@@ -4,6 +4,9 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { Control, Form, Errors, actions } from "react-redux-form";
+import Dropzone from "react-dropzone";
+import _ from "lodash";
+import * as XLSX from "xlsx";
 
 class Home extends Component {
   static propTypes = {
@@ -13,120 +16,53 @@ class Home extends Component {
     history: PropTypes.object.isRequired
   };
 
+  constructor(props) {
+    super(props);
+    this.resetDataClick = this.resetDataClick.bind(this);
+  }
+
   render() {
+    const { leaderboardData, parseXLSX, history } = this.props;
+    const { dataLoaded } = leaderboardData;
     return (
       <div className="col-md-8 col-md-offset-2">
         <div className="well">
           <h2>Zadání informací</h2>
-          <Form
-            model="formData.input"
-            onSubmit={formValues => {
-              this.props.parseData(formValues, this.props.history);
-            }}
-            className="form-horizontal"
+          {!dataLoaded && (
+            <div className="form-group">
+              <Dropzone
+                className="dropzone text-center"
+                multiple={false}
+                onDrop={files => {
+                  _.map(files, file => {
+                    parseXLSX(file, history);
+                  });
+                }}
+              >
+                <h2>👇</h2>
+                <p>Přetáhni sem report z maturit</p>
+              </Dropzone>
+            </div>
+          )}
+          {dataLoaded && (
+            <Link to="/zebricek" className="btn btn-primary btn-lg">
+              Vygenerovat
+            </Link>
+          )}
+          <button
+            type="button"
+            className="btn btn-danger btn-lg"
+            onClick={this.resetDataClick}
           >
-            <div className="form-group">
-              <label htmlFor=".top70Production" className="form-label">
-                Top 70 v převodech:
-              </label>
-              <Control.textarea
-                model=".top70Production"
-                required
-                id="top70Production"
-                validateOn={["blur"]}
-                className="form-control"
-                rows="2"
-              />
-              <Errors
-                className="has-error"
-                component={props => (
-                  <span className="help-block">{props.children}</span>
-                )}
-                model=".top70Production"
-                messages={{
-                  valueMissing: "Tato položka je povinná"
-                }}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor=".top10Meetings" className="form-label">
-                Top 10 v % schůzkovatelnosti:
-              </label>
-              <Control.textarea
-                model=".top10Meetings"
-                required
-                id="top10Meetings"
-                validateOn={["blur"]}
-                className="form-control"
-                rows="2"
-              />
-              <Errors
-                className="has-error"
-                component={props => (
-                  <span className="help-block">{props.children}</span>
-                )}
-                model=".top10Meetings"
-                messages={{
-                  valueMissing: "Tato položka je povinná"
-                }}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor=".topUMsPercentage" className="form-label">
-                Žebříček UM:
-              </label>
-              <Control.textarea
-                model=".topUMsPercentage"
-                required
-                id="topUMsPercentage"
-                validateOn={["blur"]}
-                className="form-control"
-                rows="2"
-              />
-              <Errors
-                className="has-error"
-                component={props => (
-                  <span className="help-block">{props.children}</span>
-                )}
-                model=".topUMsPercentage"
-                messages={{
-                  valueMissing: "Tato položka je povinná"
-                }}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor=".timeline" className="form-label">
-                Časová řada:
-              </label>
-              <Control.textarea
-                model=".timeline"
-                id="timeline"
-                validateOn={["blur"]}
-                className="form-control"
-                rows="2"
-              />
-              <Errors
-                className="has-error"
-                component={props => (
-                  <span className="help-block">{props.children}</span>
-                )}
-                model=".timeline"
-                messages={{
-                  valueMissing: "Tato položka je povinná"
-                }}
-              />
-            </div>
-            <div className="form-group">
-              <button type="submit" className="btn btn--primary btn--lg">
-                Vygenerovat
-              </button>
-            </div>
-          </Form>
+            Reset
+          </button>
         </div>
-        <pre>{JSON.stringify(this.props.inputData, null, 2)}</pre>
         <pre>{JSON.stringify(this.props.leaderboardData, null, 2)}</pre>
       </div>
     );
+  }
+  resetDataClick() {
+    this.props.resetData();
   }
 }
 

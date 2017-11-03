@@ -40,7 +40,7 @@ class Leaderboard extends PureComponent {
         <Top70Production
           top70Production={_.get(this.props, "leaderboardData.top70Production")}
         />
-        <div className="col-md-12">
+        {/*<div className="col-md-12">
           <h2>Historie produkce</h2>
           <LineChart
             data={{
@@ -60,16 +60,12 @@ class Leaderboard extends PureComponent {
               ]
             }}
             options={{
-              scaleOverride: true,
-              scaleSteps: 2,
-              scaleStepWidth: 10000000,
-              scaleStartValue: 0,
               pointDot: false
             }}
             width="1100"
             height="400"
           />
-        </div>
+        </div>*/}
       </div>
     );
   }
