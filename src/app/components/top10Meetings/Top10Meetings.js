@@ -44,7 +44,7 @@ export default class Top10Meetings extends PureComponent {
               <span>
                 3. {_.get(_.nth(_.get(this.props, "list"), 2), "jmeno")}
               </span>
-            </div>{" "}
+            </div>
           </div>
         </div>
         <div className="col-md-4">

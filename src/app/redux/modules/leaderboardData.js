@@ -97,7 +97,7 @@ export function parseXLSX(file, history) {
       const wb = XLSX.read(reader.result, { type: "binary" });
       const unityDetail = _.filter(
         XLSX.utils.sheet_to_json(wb.Sheets["Unity_detail"], {
-          range: 3
+          range: 4
         }),
         row => {
           return _.size(row) > 0;
@@ -106,7 +106,7 @@ export function parseXLSX(file, history) {
 
       const poradciDetail = _.filter(
         XLSX.utils.sheet_to_json(wb.Sheets["Poradci_detail"], {
-          range: 3
+          range: 4
         }),
         row => {
           return _.size(row) > 0;
@@ -125,7 +125,7 @@ export function parseXLSX(file, history) {
       const topUMsPercentage = _.map(topUMsPercentageSource, row => {
         return {
           agentura: _.get(row, "Agentura").substring(0, 2),
-          jmeno: _.get(row, "Unit manager"),
+          jmeno: _.get(row, "UNIT_MANAGER"),
           procento: new Number(
             _.get(row, "Úspěšnost Kč").replace(/[^0-9$.,]/g, "")
           ).toLocaleString("cs-CZ", {
@@ -135,29 +135,37 @@ export function parseXLSX(file, history) {
         };
       });
 
-      const top70ProductionSource = _.reverse(
-        _.sortBy(poradciDetail, row => {
-          const uspesnost = new Number(
-            _.get(row, "Hodnota investic").replace(/[^0-9$.]/g, "")
-          );
-          return uspesnost;
+      const top70Production = poradciDetail
+        .map(row => {
+          return {
+            ...row,
+            "Skutečná produkce NNIP": new Number(
+              row["Skutečná produkce NNIP"].replace(/[^0-9$.]/g, "")
+            )
+          };
         })
-      );
-
-      const top70Production = _.map(top70ProductionSource, row => {
-        return {
-          agentura: _.get(row, "Agentura").substring(0, 2),
-          jmeno: _.get(row, "PORADCE"),
-          produkce: new Number(
-            _.get(row, "Hodnota investic").replace(/[^0-9$.]/g, "")
-          ).toLocaleString("cs-CZ", {
-            style: "currency",
-            currency: "CZK",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-          })
-        };
-      });
+        .filter(row => row["Skutečná produkce NNIP"] > 0)
+        .sort(
+          (a, b) =>
+            a["Skutečná produkce NNIP"] < b["Skutečná produkce NNIP"] ? 1 : -1
+        )
+        .slice(0, 70)
+        .map(
+          row =>
+            new Object({
+              agentura: _.get(row, "Agentura").substring(0, 2),
+              jmeno: _.get(row, "PORADCE"),
+              produkce: _.get(row, "Skutečná produkce NNIP").toLocaleString(
+                "cs-CZ",
+                {
+                  style: "currency",
+                  currency: "CZK",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }
+              )
+            })
+        );
 
       const top10MeetingSource = _.reverse(
         _.sortBy(
@@ -193,7 +201,7 @@ export function parseXLSX(file, history) {
         top10Meetings: top10Meetings
       });
 
-      history.push("/zebricek");
+      // history.push("/zebricek");
     };
     reader.onabort = () => console.log("file reading was aborted");
     reader.onerror = () => console.log("file reading has failed");
